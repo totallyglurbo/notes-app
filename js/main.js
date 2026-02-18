@@ -53,6 +53,9 @@ Vue.component('card', {
            <label for="name">Name:</label>
            <input id="name" v-model="name" placeholder="Name">
            <label for="itemCount">Number of options:</label>
+           <select id="options" v-model.number="itemCount">
+            <option v-for="option in options" :key="option" :value="option">{{ option }}</option>
+           </select>
          </p>
          <p>
            <label for="options">Options:</label>

@@ -52,6 +52,11 @@ Vue.component('card', {
          <p>
            <label for="name">Name:</label>
            <input id="name" v-model="name" placeholder="Name">
+           <label for="itemCount">Number of options:</label>
+         </p>
+         <p>
+           <label for="options">Options:</label>
+           <input id="options" v-model="options" placeholder="Options">
          </p>
          <p>
            <input type="submit" value="Submit"> 
@@ -61,20 +66,36 @@ Vue.component('card', {
     data() {
         return {
             name: null,
+            options: [3, 4, 5],
+            itemCount: 3,
+            newItem: null,
+            listItems: [],
             errors: []
         }
     },
 
     methods:{
+        addItem() {
+            if (this.newItem && this.listItems.length < this.itemCount) {
+                this.listItems.push(this.newItem);
+                this.newItem = null;
+            }
+        },
         onSubmit() {
             if(this.name) {
                 let cardItem = {
                     name: this.name,
+                    options: this.options
                 }
                 this.$emit('card-submitted', cardItem)
-                this.name = null
+                this.name = null;
+                this.listItems = [];
+                this.itemCount = 3;
             } else {
                 if(!this.name) this.errors.push("Name required.")
+                if(this.listItems.length === 0) {
+                    this.errors.push("One option required.")
+                }
             }
         }
     }
@@ -90,3 +111,4 @@ let app = new Vue({
         thdColumnCards: []
     }
 })
+

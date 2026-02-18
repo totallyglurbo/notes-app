@@ -13,7 +13,14 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 </head>
 <body>
 <div id="app">
-
+    <fst-column
+    :cards="fstColumnCards"
+    max="fstMax"></fst-column>
+  <scnd-column
+    :cards="scndColumnCards"
+    max="scndMax"></scnd-column>
+  <thd-column
+    :cards="thdColumnCards"></thd-column>
 </div>
 </body>
 </html>

@@ -1,7 +1,9 @@
 Vue.component('fst-column', {
     props: {
-        cards: [],
-        max: Number
+      max: {
+        type: Number,
+        required: true
+      }
     },
     template: `
     <div>
@@ -10,10 +12,17 @@ Vue.component('fst-column', {
             <h2>Cards</h2>
             <p v-if="!cards.length">There are no cards yet.</p>
             <ul>
-              <li v-for="(card, index) in cards" :key="index">
+              <li v-for="(card, cIndex) in cards" :key="cIndex">
                 <p><strong>{{ card.name }}</strong></p>
                 <ul>
-                  <li v-for="(option, index) in card.options" :key="index">{{ option }}</li>
+                  <li v-for="(option, oIndex) in card.options" :key="oIndex">
+                    <label>
+                      <input type="checkbox"
+                             v-model="card.checkedOptions[oIndex]"
+                             @change="checkCard(cIndex)">
+                      {{ option }}
+                    </label>
+                  </li>
                 </ul>
               </li>
             </ul>
@@ -22,21 +31,79 @@ Vue.component('fst-column', {
 
     </div>
     `,
+    data() {
+      return {
+        cards: []
+      }
+    },
     methods: {
         addCard(cardItem) {
-            this.cards.push(cardItem)
+            let checkedOptions = [];
+            for (let i = 0; i < cardItem.options.length; i++) {
+                checkedOptions.push(false);
+            }
+            let newCard = {
+                name: cardItem.name,
+                options: cardItem.options,
+                checkedOptions: checkedOptions
+            };
+            this.cards.push(newCard)
+        },
+        checkCard(cardIndex) {
+            let card = this.cards[cardIndex];
+            let checkedCount = 0;
+            for (let i = 0; i < card.checkedOptions.length; i++) {
+                if (card.checkedOptions[i] === true) {
+                    checkedCount++;
+                }
+            }
+            if (checkedCount > card.options.length / 2) {
+                this.$emit('move-card-to-second', card);
+                this.cards.splice(cardIndex, 1);
+            }
         }
-
     }
 })
 Vue.component('scnd-column', {
+    props: {
+        cards: {
+          type: Array,
+          required: true
+        }
+    },
     template: `
     <div>
         <h2>Second Column</h2>
+        <div v-if="!cards.length">No cards yet.</div>
+        <ul>
+          <li v-for="(card, cIndex) in cards" :key="cIndex">
+            <b>{{ card.name }}</b>
+            <ul>
+              <li v-for="(option, oIndex) in card.options" :key="oIndex">
+                <label>
+                  <input type="checkbox" v-model="cards[cIndex].checkedOptions[oIndex]"
+                   @change="handleChange(card, cIndex)"/>
+                  {{ option }}
+                </label>
+              </li>
+            </ul>
+          </li>
+        </ul>
     </div>
-    `
+    `,
+    methods: {
+        handleChange(card, index) {
+          this.$emit('card-checked', card, index);
+        }
+  }
 })
 Vue.component('thd-column', {
+    props: {
+        cards: {
+          type: Array,
+          required: true
+        }
+    },
     template: `
     <div>
         <h2>Third Column</h2>
@@ -115,6 +182,24 @@ let app = new Vue({
         fstColumnCards: [],
         scndColumnCards: [],
         thdColumnCards: []
+    },
+    methods: {
+    moveCardToSecond(card) {
+      this.scndColumnCards.push(card);
+    },
+    checkCardInSecond(card, index) {
+      let allChecked = true;
+      for (let i = 0; i < card.checkedOptions.length; i++) {
+        if (!card.checkedOptions[i]) {
+          allChecked = false;
+          break;
+        }
+      }
+      if (allChecked) {
+        this.thdColumnCards.push(card);
+        this.scndColumnCards.splice(index, 1);
+      }
     }
+  }
 })
 

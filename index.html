@@ -15,10 +15,10 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 <div id="app">
     <fst-column
     :cards="fstColumnCards"
-    max="fstMax"></fst-column>
+    max="fstMax" @move-card-to-second="moveCardToSecond"></fst-column>
   <scnd-column
     :cards="scndColumnCards"
-    max="scndMax"></scnd-column>
+    max="scndMax" @card-checked="checkCardInSecond"></scnd-column>
   <thd-column
     :cards="thdColumnCards"></thd-column>
 </div>

@@ -16,7 +16,8 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <fst-column class="column"
     :cards="fstColumnCards"
     :max="fstMax" @move-card-to-second="moveCardToSecond"
-    :disable-controls="fstColumnDisabled"></fst-column>
+    :disable-controls="fstColumnDisabled"
+    @update-cards="cards => {this.fstColumnCards = cards; this.saveData()}"></fst-column>
   <scnd-column class="column"
     :cards="scndColumnCards"
     max="scndMax" @card-checked="checkCardInSecond"></scnd-column>

@@ -1,5 +1,9 @@
 Vue.component('fst-column', {
     props: {
+        cards: {
+            type: Array,
+            required: true
+        },
       max: {
         type: Number,
         required: true
@@ -10,10 +14,9 @@ Vue.component('fst-column', {
     <div>
         <h2>First Column</h2>
         <div>
-            <h2>Cards</h2>
-            <p v-if="!cards.length">There are no cards yet.</p>
+            <p v-if="!cards.length" class="noCards">There are no cards yet.</p>
             <ul>
-              <li v-for="(card, cIndex) in cards" :key="cIndex">
+              <li v-for="(card, cIndex) in cards" :key="cIndex" class="cardName">
                 <p><strong>{{ card.name }}</strong></p>
                 <ul>
                   <li v-for="(option, oIndex) in card.options" :key="oIndex">
@@ -33,11 +36,6 @@ Vue.component('fst-column', {
 
     </div>
     `,
-    data() {
-      return {
-        cards: []
-      }
-    },
     methods: {
         addCard(cardItem) {
             let checkedOptions = [];
@@ -50,7 +48,7 @@ Vue.component('fst-column', {
                 checkedOptions: checkedOptions
             };
             this.cards.push(newCard)
-            this.saveData();
+            this.$emit('update-cards', this.cards);
         },
         checkCard(cardIndex) {
             let card = this.cards[cardIndex];
@@ -64,7 +62,7 @@ Vue.component('fst-column', {
                 this.$emit('move-card-to-second', card);
                 this.cards.splice(cardIndex, 1);
             }
-            this.saveData();
+            this.$emit('update-cards', this.cards);
         }
     }
 })
@@ -78,9 +76,9 @@ Vue.component('scnd-column', {
     template: `
     <div>
         <h2>Second Column</h2>
-        <div v-if="!cards.length">No cards yet.</div>
+        <div v-if="!cards.length" class="noCards">There are no cards yet.</div>
         <ul>
-          <li v-for="(card, cIndex) in cards" :key="cIndex">
+          <li v-for="(card, cIndex) in cards" :key="cIndex" class="cardName">
             <b>{{ card.name }}</b>
             <ul>
               <li v-for="(option, oIndex) in card.options" :key="oIndex">
@@ -112,9 +110,9 @@ Vue.component('thd-column', {
     template: `
     <div>
         <h2>Third Column</h2>
-        <div v-if="!cards.length">No cards yet.</div>
+        <div v-if="!cards.length" class="noCards">There are no cards yet.</div>
           <ul>
-            <li v-for="(card, index) in cards" :key="index">
+            <li v-for="(card, index) in cards" :key="index" class="cardName">
               <b>{{ card.name }}</b>
               <ul>
                 <li v-for="option in card.options">{{ option }}</li>
@@ -127,7 +125,7 @@ Vue.component('thd-column', {
 })
 Vue.component('card', {
     template: `
-    <form class="review-form" @submit.prevent="onSubmit">
+    <form @submit.prevent="onSubmit">
         <p v-if="errors.length">
             <b>Please correct the following error(s):</b>
             <ul>
@@ -147,7 +145,7 @@ Vue.component('card', {
           <li v-for="(item, index) in listItems" :key="index">{{ item }}</li>
         </ul>
          <p>
-           <input type="submit" value="Submit"> 
+           <input type="submit" value="Submit" class="submit"> 
          </p>
     </form>
     `,
@@ -167,7 +165,6 @@ Vue.component('card', {
                 this.listItems.push(this.newItem);
                 this.newItem = null;
             }
-            this.saveData();
         },
         onSubmit() {
             this.errors = [];
@@ -210,7 +207,6 @@ let app = new Vue({
         const savedFirst = localStorage.getItem('fstColumnCards');
         const savedSecond = localStorage.getItem('scndColumnCards');
         const savedThird = localStorage.getItem('thdColumnCards');
-
         if (savedFirst) this.fstColumnCards = JSON.parse(savedFirst);
         if (savedSecond) this.scndColumnCards = JSON.parse(savedSecond);
         if (savedThird) this.thdColumnCards = JSON.parse(savedThird);
@@ -220,6 +216,14 @@ let app = new Vue({
         localStorage.setItem('fstColumnCards', JSON.stringify(this.fstColumnCards));
         localStorage.setItem('scndColumnCards', JSON.stringify(this.scndColumnCards));
         localStorage.setItem('thdColumnCards', JSON.stringify(this.thdColumnCards));
+    },
+    clearAllData() {
+        localStorage.removeItem('fstColumnCards');
+        localStorage.removeItem('scndColumnCards');
+        localStorage.removeItem('thdColumnCards');
+        this.fstColumnCards = [];
+        this.scndColumnCards = [];
+        this.thdColumnCards = [];
     },
     moveCardToSecond(card) {
     if (this.scndColumnCards.length >= 5) {

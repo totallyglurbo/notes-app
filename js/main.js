@@ -50,6 +50,7 @@ Vue.component('fst-column', {
                 checkedOptions: checkedOptions
             };
             this.cards.push(newCard)
+            this.saveData();
         },
         checkCard(cardIndex) {
             let card = this.cards[cardIndex];
@@ -63,6 +64,7 @@ Vue.component('fst-column', {
                 this.$emit('move-card-to-second', card);
                 this.cards.splice(cardIndex, 1);
             }
+            this.saveData();
         }
     }
 })
@@ -96,6 +98,7 @@ Vue.component('scnd-column', {
     methods: {
         handleChange(card, index) {
           this.$emit('card-checked', card, index);
+          this.saveData();
         }
   }
 })
@@ -136,8 +139,9 @@ Vue.component('card', {
            <input id="name" v-model="name" placeholder="Name">
          </p>
          <div>
-          <input v-model="newItem" placeholder="Введите пункт" />
-          <button @click.prevent="addItem" :disabled="listItems.length >= 5">Добавить пункт</button>
+          <label for="item">List item:</label>
+          <input id="item" v-model="newItem" placeholder="List item" />
+          <button @click.prevent="addItem" :disabled="listItems.length >= 5">Add list item</button>
         </div>
          <ul>
           <li v-for="(item, index) in listItems" :key="index">{{ item }}</li>
@@ -163,6 +167,7 @@ Vue.component('card', {
                 this.listItems.push(this.newItem);
                 this.newItem = null;
             }
+            this.saveData();
         },
         onSubmit() {
             this.errors = [];
@@ -170,7 +175,7 @@ Vue.component('card', {
                 this.errors.push("Name required.");
             }
             if (this.listItems.length < 3) {
-                this.errors.push("Please enter at least 3 options.");
+                this.errors.push("Please enter at least 3 items.");
             }
             if (this.errors.length === 0) {
                 let cardItem = {
@@ -182,6 +187,7 @@ Vue.component('card', {
                 this.listItems = [];
                 this.newItem = null;
             }
+            this.saveData();
         }
     }
 
@@ -200,12 +206,27 @@ let app = new Vue({
       return this.scndColumnCards.length >= 5;
     }
     },
+    mounted() {
+        const savedFirst = localStorage.getItem('fstColumnCards');
+        const savedSecond = localStorage.getItem('scndColumnCards');
+        const savedThird = localStorage.getItem('thdColumnCards');
+
+        if (savedFirst) this.fstColumnCards = JSON.parse(savedFirst);
+        if (savedSecond) this.scndColumnCards = JSON.parse(savedSecond);
+        if (savedThird) this.thdColumnCards = JSON.parse(savedThird);
+    },
     methods: {
+    saveData() {
+        localStorage.setItem('fstColumnCards', JSON.stringify(this.fstColumnCards));
+        localStorage.setItem('scndColumnCards', JSON.stringify(this.scndColumnCards));
+        localStorage.setItem('thdColumnCards', JSON.stringify(this.thdColumnCards));
+    },
     moveCardToSecond(card) {
     if (this.scndColumnCards.length >= 5) {
         return;
     }
       this.scndColumnCards.push(card);
+    this.saveData();
     },
     checkCardInSecond(card, index) {
       let allChecked = true;
@@ -220,6 +241,7 @@ let app = new Vue({
         this.thdColumnCards.push(card);
         this.scndColumnCards.splice(index, 1);
       }
+      this.saveData();
     }
   }
 })

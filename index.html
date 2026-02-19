@@ -13,14 +13,14 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 </head>
 <body>
 <div id="app">
-    <fst-column
+    <fst-column class="column"
     :cards="fstColumnCards"
     :max="fstMax" @move-card-to-second="moveCardToSecond"
     :disable-controls="fstColumnDisabled"></fst-column>
-  <scnd-column
+  <scnd-column class="column"
     :cards="scndColumnCards"
     max="scndMax" @card-checked="checkCardInSecond"></scnd-column>
-  <thd-column
+  <thd-column class="column"
     :cards="thdColumnCards"></thd-column>
 </div>
 </body>

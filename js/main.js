@@ -12,11 +12,11 @@ Vue.component('fst-column', {
     },
     template: `
     <div>
-        <h2>First Column</h2>
+        <h2>New tasks</h2>
         <div>
             <p v-if="!cards.length" class="noCards">There are no cards yet.</p>
             <ul>
-              <li v-for="(card, cIndex) in cards" :key="cIndex" class="cardName">
+              <li v-for="(card, cIndex) in cards" :key="Date.now()" class="cardName">
                 <p><strong>{{ card.name }}</strong></p>
                 <ul>
                   <li v-for="(option, oIndex) in card.options" :key="oIndex">
@@ -75,10 +75,10 @@ Vue.component('scnd-column', {
     },
     template: `
     <div>
-        <h2>Second Column</h2>
+        <h2>Tasks in progress</h2>
         <div v-if="!cards.length" class="noCards">There are no cards yet.</div>
         <ul>
-          <li v-for="(card, cIndex) in cards" :key="cIndex" class="cardName">
+          <li v-for="(card, cIndex) in cards" :key="Date.now()" class="cardName">
             <b>{{ card.name }}</b>
             <ul>
               <li v-for="(option, oIndex) in card.options" :key="oIndex">
@@ -109,10 +109,10 @@ Vue.component('thd-column', {
     },
     template: `
     <div>
-        <h2>Third Column</h2>
+        <h2>Completed tasks</h2>
         <div v-if="!cards.length" class="noCards">There are no cards yet.</div>
           <ul>
-            <li v-for="(card, index) in cards" :key="index" class="cardName">
+            <li v-for="(card, index) in cards" :key="Date.now()" class="cardName">
               <b>{{ card.name }}</b>
               <ul>
                 <li v-for="option in card.options">{{ option }}</li>
@@ -145,7 +145,7 @@ Vue.component('card', {
           <li v-for="(item, index) in listItems" :key="index">{{ item }}</li>
         </ul>
          <p>
-           <input type="submit" value="Submit" class="submit"> 
+           <input type="submit" value="Submit" class="submit">
          </p>
     </form>
     `,
@@ -249,4 +249,7 @@ let app = new Vue({
     }
   }
 })
+
+
+
 

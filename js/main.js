@@ -3,7 +3,8 @@ Vue.component('fst-column', {
       max: {
         type: Number,
         required: true
-      }
+      },
+      disableControls: Boolean
     },
     template: `
     <div>
@@ -19,14 +20,15 @@ Vue.component('fst-column', {
                     <label>
                       <input type="checkbox"
                              v-model="card.checkedOptions[oIndex]"
-                             @change="checkCard(cIndex)">
+                             @change="checkCard(cIndex)"
+                             :disabled="disableControls">
                       {{ option }}
                     </label>
                   </li>
                 </ul>
               </li>
             </ul>
-           </div> <card v-if="cards.length < 3"@card-submitted="addCard"></card>
+           </div> <card v-if="cards.length < 3 && !disableControls"@card-submitted="addCard"></card>
        </div>
 
     </div>
@@ -107,6 +109,16 @@ Vue.component('thd-column', {
     template: `
     <div>
         <h2>Third Column</h2>
+        <div v-if="!cards.length">No cards yet.</div>
+          <ul>
+            <li v-for="(card, index) in cards" :key="index">
+              <b>{{ card.name }}</b>
+              <ul>
+                <li v-for="option in card.options">{{ option }}</li>
+              </ul>
+              {{ card.finishedAt }}
+            </li>
+          </ul>
     </div>
     `
 })
@@ -183,8 +195,16 @@ let app = new Vue({
         scndColumnCards: [],
         thdColumnCards: []
     },
+    computed: {
+    fstColumnDisabled() {
+      return this.scndColumnCards.length >= 5;
+    }
+    },
     methods: {
     moveCardToSecond(card) {
+    if (this.scndColumnCards.length >= 5) {
+        return;
+    }
       this.scndColumnCards.push(card);
     },
     checkCardInSecond(card, index) {
@@ -196,6 +216,7 @@ let app = new Vue({
         }
       }
       if (allChecked) {
+        card.finishedAt = new Date().toLocaleString();
         this.thdColumnCards.push(card);
         this.scndColumnCards.splice(index, 1);
       }

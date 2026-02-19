@@ -15,7 +15,8 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 <div id="app">
     <fst-column
     :cards="fstColumnCards"
-    max="fstMax" @move-card-to-second="moveCardToSecond"></fst-column>
+    :max="fstMax" @move-card-to-second="moveCardToSecond"
+    :disable-controls="fstColumnDisabled"></fst-column>
   <scnd-column
     :cards="scndColumnCards"
     max="scndMax" @card-checked="checkCardInSecond"></scnd-column>

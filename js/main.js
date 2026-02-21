@@ -8,7 +8,11 @@ Vue.component('fst-column', {
         type: Number,
         required: true
       },
-      disableControls: Boolean
+      disableControls: Boolean,
+      scndCards: {
+            type: Array,
+            required: true
+        }
     },
     template: `
     <div>
@@ -58,13 +62,13 @@ Vue.component('fst-column', {
                     checkedCount++;
                 }
             }
-            if (checkedCount > card.options.length / 2) {
+            if (checkedCount > card.options.length / 2 && this.scndCards.length < 5) {
                 this.$emit('move-card-to-second', card);
                 this.cards.splice(cardIndex, 1);
             }
             this.$emit('update-cards', this.cards);
         }
-    }
+    },
 })
 Vue.component('scnd-column', {
     props: {
@@ -199,9 +203,29 @@ let app = new Vue({
         thdColumnCards: []
     },
     computed: {
-    fstColumnDisabled() {
-      return this.scndColumnCards.length >= 5;
-    }
+  fstColumnDisabled() {
+    const secondMaxReached = this.scndColumnCards.length >= this.scndMax;
+    const hasHalfDoneCardInFirst = this.fstColumnCards.some(card => {
+      const checkedCount = card.checkedOptions.filter(Boolean).length;
+      return card.options.length > 0 && (checkedCount > card.options.length / 2);
+    });
+    return secondMaxReached && hasHalfDoneCardInFirst;
+  }
+  },
+  watch: {
+      fstColumnDisabled(newVal, oldVal) {
+        if (oldVal && !newVal) {
+          let lastCard = this.fstColumnCards[this.fstColumnCards.length - 1];
+          if (lastCard) {
+            for (let i = lastCard.checkedOptions.length - 1; i >= 0; i--) {
+              if (lastCard.checkedOptions[i]) {
+                this.$set(lastCard.checkedOptions, i, false);
+                break;
+              }
+            }
+          }
+        }
+      }
     },
     mounted() {
         const savedFirst = localStorage.getItem('fstColumnCards');
@@ -249,7 +273,6 @@ let app = new Vue({
     }
   }
 })
-
 
 
 

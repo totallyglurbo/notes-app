@@ -89,3 +89,21 @@ button:hover, .submit:hover {
 padding-bottom: 1em;
 align-self: flex-end;
 }
+.pulse-red {
+  animation: pulseRed 1s infinite;
+  border: 2px solid red;
+}
+@keyframes pulseRed {
+  0% { box-shadow: 0 0 5px red; }
+  50% { box-shadow: 0 0 15px red; }
+  100% { box-shadow: 0 0 5px red; }
+}
+.pulse-orange {
+  animation: pulseOrange 1s infinite;
+  border: 2px solid orange;
+}
+@keyframes pulseOrange {
+  0% { box-shadow: 0 0 5px orange; }
+  50% { box-shadow: 0 0 15px orange; }
+  100% { box-shadow: 0 0 5px orange; }
+}

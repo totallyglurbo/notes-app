@@ -20,7 +20,8 @@ Vue.component('fst-column', {
         <div>
             <p v-if="!cards.length" class="noCards">There are no cards yet.</p>
             <ul>
-              <li v-for="(card, cIndex) in cards" :key="Date.now()" class="cardName">
+              <li v-for="(card, cIndex) in cards" :key="Date.now()" class="cardName"
+              :class="getCardAnimationClass(card)">
                 <p><strong>{{ card.name }}</strong></p>
                 <ul>
                   <li v-for="(option, oIndex) in card.options" :key="oIndex">
@@ -33,6 +34,7 @@ Vue.component('fst-column', {
                     </label>
                   </li>
                 </ul>
+                <b>Deadline: {{ card.deadline }}</b>
               </li>
             </ul>
            </div> <card v-if="cards.length < 3 && !disableControls"@card-submitted="addCard"></card>
@@ -49,7 +51,8 @@ Vue.component('fst-column', {
             let newCard = {
                 name: cardItem.name,
                 options: cardItem.options,
-                checkedOptions: checkedOptions
+                checkedOptions: checkedOptions,
+                deadline: cardItem.deadline
             };
             this.cards.push(newCard)
             this.$emit('update-cards', this.cards);
@@ -67,7 +70,18 @@ Vue.component('fst-column', {
                 this.cards.splice(cardIndex, 1);
             }
             this.$emit('update-cards', this.cards);
-        }
+        },
+        getCardAnimationClass(card) {
+            const now = new Date();
+            const deadline = new Date(card.deadline);
+            const diffHours = (deadline - now) / (1000 * 60 * 60);
+            if (diffHours < 24) {
+              return 'pulse-red';
+            } else if (diffHours >= 24 && diffHours < 72) {
+              return 'pulse-orange';
+            }
+            return '';
+          }
     },
 })
 Vue.component('scnd-column', {
@@ -82,7 +96,8 @@ Vue.component('scnd-column', {
         <h2>Tasks in progress</h2>
         <div v-if="!cards.length" class="noCards">There are no cards yet.</div>
         <ul>
-          <li v-for="(card, cIndex) in cards" :key="Date.now()" class="cardName">
+          <li v-for="(card, cIndex) in cards" :key="Date.now()" class="cardName"
+          :class="getCardAnimationClass(card)">
             <b>{{ card.name }}</b>
             <ul>
               <li v-for="(option, oIndex) in card.options" :key="oIndex">
@@ -93,6 +108,7 @@ Vue.component('scnd-column', {
                 </label>
               </li>
             </ul>
+            <b>Deadline: {{ card.deadline }}</b>
           </li>
         </ul>
     </div>
@@ -101,7 +117,18 @@ Vue.component('scnd-column', {
         handleChange(card, index) {
           this.$emit('card-checked', card, index);
           this.saveData();
-        }
+        },
+        getCardAnimationClass(card) {
+            const now = new Date();
+            const deadline = new Date(card.deadline);
+            const diffHours = (deadline - now) / (1000 * 60 * 60);
+            if ( diffHours < 24) {
+              return 'pulse-red';
+            } else if (diffHours >= 24 && diffHours < 72) {
+              return 'pulse-orange';
+            }
+            return '';
+          }
   }
 })
 Vue.component('thd-column', {
@@ -116,16 +143,31 @@ Vue.component('thd-column', {
         <h2>Completed tasks</h2>
         <div v-if="!cards.length" class="noCards">There are no cards yet.</div>
           <ul>
-            <li v-for="(card, index) in cards" :key="Date.now()" class="cardName">
+            <li v-for="(card, index) in cards" :key="Date.now()" class="cardName"
+            :class="getCardAnimationClass(card)">
               <b>{{ card.name }}</b>
               <ul>
                 <li v-for="option in card.options">{{ option }}</li>
               </ul>
-              {{ card.finishedAt }}
+              <b>Deadline: {{ card.deadline }}</b>
+              <p>Finished at: {{ card.finishedAt }}</p>
             </li>
           </ul>
     </div>
-    `
+    `,
+    methods: {
+    getCardAnimationClass(card) {
+            const now = new Date();
+            const deadline = new Date(card.deadline);
+            const diffHours = (deadline - now) / (1000 * 60 * 60);
+            if (diffHours < 24) {
+              return 'pulse-red';
+            } else if (diffHours >= 24 && diffHours < 72) {
+              return 'pulse-orange';
+            }
+            return '';
+          }
+    },
 })
 Vue.component('card', {
     template: `
@@ -140,6 +182,10 @@ Vue.component('card', {
            <label for="name">Name:</label>
            <input id="name" v-model="name" placeholder="Name">
          </p>
+         <p>
+            <label for="deadline">Deadline:</label>
+            <input type="date" id="deadline" v-model="deadline">
+        </p>
          <div>
           <label for="item">List item:</label>
           <input id="item" v-model="newItem" placeholder="List item" />
@@ -159,7 +205,8 @@ Vue.component('card', {
             options: [],
             newItem: null,
             listItems: [],
-            errors: []
+            errors: [],
+            deadline: ''
         }
     },
 
@@ -175,18 +222,23 @@ Vue.component('card', {
             if (!this.name) {
                 this.errors.push("Name required.");
             }
+            if (!this.deadline) {
+                this.errors.push("Deadline required.");
+            }
             if (this.listItems.length < 3) {
                 this.errors.push("Please enter at least 3 items.");
             }
             if (this.errors.length === 0) {
                 let cardItem = {
                     name: this.name,
-                    options: this.listItems
+                    options: this.listItems,
+                    deadline: this.deadline
                 };
                 this.$emit('card-submitted', cardItem);
                 this.name = null;
                 this.listItems = [];
                 this.newItem = null;
+                this.deadline = '';
             }
             this.saveData();
         }
@@ -223,14 +275,30 @@ let app = new Vue({
         thdColumnCards: []
     },
     computed: {
-  fstColumnDisabled() {
-    const secondMaxReached = this.scndColumnCards.length >= this.scndMax;
-    const hasHalfDoneCardInFirst = this.fstColumnCards.some(card => {
-      const checkedCount = card.checkedOptions.filter(Boolean).length;
-      return card.options.length > 0 && (checkedCount > card.options.length / 2);
-    });
-    return secondMaxReached && hasHalfDoneCardInFirst;
-  }
+      fstColumnDisabled() {
+        const secondMaxReached = this.scndColumnCards.length >= this.scndMax;
+        const hasHalfDoneCardInFirst = this.fstColumnCards.some(card => {
+          const checkedCount = card.checkedOptions.filter(Boolean).length;
+          return card.options.length > 0 && (checkedCount > card.options.length / 2);
+        });
+        return secondMaxReached && hasHalfDoneCardInFirst;
+      },
+      redCardsCount() {
+        const now = new Date();
+        return this.fstColumnCards.filter(card => {
+          const deadline = new Date(card.deadline);
+          const diffHours = (deadline - now) / (1000 * 60 * 60);
+          return diffHours > 0 && diffHours < 24;
+        }).length;
+      },
+      orangeCardsCount() {
+        const now = new Date();
+        return this.fstColumnCards.filter(card => {
+          const deadline = new Date(card.deadline);
+          const diffHours = (deadline - now) / (1000 * 60 * 60);
+          return diffHours > 24 && diffHours < 72;
+        }).length;
+      },
   },
   watch: {
   fstColumnDisabled(newVal, oldVal) {
@@ -242,12 +310,12 @@ let app = new Vue({
           this.scndColumnCards.push(card);
           this.fstColumnCards.splice(i, 1);
           this.saveData();
-        } else {
+            } else {
+            }
         }
-      }
+        }
     }
-  }
-},
+    },
     mounted() {
         const savedFirst = localStorage.getItem('fstColumnCards');
         const savedSecond = localStorage.getItem('scndColumnCards');
@@ -291,8 +359,26 @@ let app = new Vue({
         this.scndColumnCards.splice(index, 1);
       }
       this.saveData();
-    }
-  }
+    },
+     countDeadlineColors() {
+        const columns = [this.fstColumnCards, this.scndColumnCards, this.thdColumnCards];
+        let redCount = 0;
+        let orangeCount = 0;
+        const now = new Date();
+        columns.forEach(cards => {
+          cards.forEach(card => {
+            const deadline = new Date(card.deadline);
+            const diffHours = (deadline - now) / (1000 * 60 * 60);
+            if (diffHours < 24) {
+              redCount++;
+            } else if (diffHours >= 24 && diffHours < 72) {
+              orangeCount++;
+            }
+          });
+        });
+        return { redCount, orangeCount };
+      }
+  },
 })
 
 

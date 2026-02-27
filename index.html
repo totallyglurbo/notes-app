@@ -13,8 +13,9 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 </head>
 <body>
 <div id="app">
+    <p>Red cards: {{ countDeadlineColors().redCount }}</p>
+    <p>Orange cards: {{ countDeadlineColors().orangeCount }}</p>
     <avg-items class="average" v-if="thdColumnCards.length >= 5" :cards="thdColumnCards"></avg-items>
-    <button @click="clearAllData">Clear All Data</button>
     <div>
         <fst-column class="column"
                 :scnd-cards="scndColumnCards"

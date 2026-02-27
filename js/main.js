@@ -193,6 +193,26 @@ Vue.component('card', {
     }
 
 })
+Vue.component('avg-items', {
+  props: {
+    cards: {
+      type: Array,
+      required: true
+    }
+  },
+  computed: {
+    averageCount() {
+      if (this.cards.length < 5) return null;
+      const totalItems = this.cards.reduce((sum, card) => sum + card.options.length, 0);
+      return (totalItems / this.cards.length).toFixed(2);
+    }
+  },
+  template: `
+    <div v-if="averageCount !== null">
+      Average number of tasks in a card: {{ averageCount }}
+    </div>
+  `
+});
 let app = new Vue({
     el: '#app',
     data: {
@@ -213,20 +233,21 @@ let app = new Vue({
   }
   },
   watch: {
-      fstColumnDisabled(newVal, oldVal) {
-        if (oldVal && !newVal) {
-          let lastCard = this.fstColumnCards[this.fstColumnCards.length - 1];
-          if (lastCard) {
-            for (let i = lastCard.checkedOptions.length - 1; i >= 0; i--) {
-              if (lastCard.checkedOptions[i]) {
-                this.$set(lastCard.checkedOptions, i, false);
-                break;
-              }
-            }
-          }
+  fstColumnDisabled(newVal, oldVal) {
+    if (!newVal && oldVal) {
+      for (let i = this.fstColumnCards.length - 1; i >= 0; i--) {
+        const card = this.fstColumnCards[i];
+        const checkedCount = card.checkedOptions.filter(Boolean).length;
+        if (checkedCount > card.options.length / 2 && this.scndColumnCards.length < this.scndMax) {
+          this.scndColumnCards.push(card);
+          this.fstColumnCards.splice(i, 1);
+          this.saveData();
+        } else {
         }
       }
-    },
+    }
+  }
+},
     mounted() {
         const savedFirst = localStorage.getItem('fstColumnCards');
         const savedSecond = localStorage.getItem('scndColumnCards');

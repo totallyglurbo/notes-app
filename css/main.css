@@ -20,8 +20,12 @@ body {
 }
 #app {
     display: flex;
-    justify-content: space-between;
     width: 80%;
+    flex-direction: column;
+}
+#app > div {
+    display: flex;
+    justify-content: space-between;
 }
 .column {
     display: flex;
@@ -80,4 +84,8 @@ button, .submit {
 }
 button:hover, .submit:hover {
     background: #e4dfdc;
+}
+.average {
+padding-bottom: 1em;
+align-self: flex-end;
 }
